@@ -1,3 +1,4 @@
+import asyncio
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
@@ -121,7 +122,16 @@ def analyze_report():
         analysis_en = analyze_medical_report(extracted_text)
 
         # Translate the analysis into Hindi
-        analysis_hi = translator.translate(analysis_en, src="en", dest="hi").text
+        # analysis_hi = translator.translate(analysis_en, src="en", dest="hi").text
+
+        async def translate_text(text, src_lang="en", dest_lang="hi"):
+            return await translator.translate(text, src=src_lang, dest=dest_lang)
+        
+        analysis_hi = asyncio.run(translate_text(analysis_en))
+        analysis_hi = analysis_hi.text
+
+
+
         print("Flask API Response:", {"analysis_en": analysis_en, "analysis_hi": analysis_hi})
 
         return jsonify({"analysis_en": analysis_en, "analysis_hi": analysis_hi})
